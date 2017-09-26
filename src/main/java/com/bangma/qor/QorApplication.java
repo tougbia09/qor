@@ -15,7 +15,6 @@ import com.bangma.qor.utility.StateManager;
 import static com.bangma.qor.utility.StateManager.State;
 
 public class QorApplication extends ApplicationAdapter {
-    static StateManager stateManager;
     Music loop;
     
     public static void main (String[] arg) {
@@ -46,7 +45,7 @@ public class QorApplication extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        stateManager.dispose();
+        StateManager.dispose();
         loop.dispose();
     }
 }

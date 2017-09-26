@@ -5,9 +5,7 @@ import com.bangma.qor.scenes.ConfirmExit;
 import com.bangma.qor.scenes.GameBoard;
 import com.bangma.qor.scenes.GameModeSelect;
 import com.bangma.qor.scenes.MainMenu;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
 
 public class StateManager {
     public enum State {
@@ -22,11 +20,11 @@ public class StateManager {
         KILL_GAME           // flag the main loop to kill the application
     }
 
-    private static Scene CurrentScene;
-    private static Map<State, Scene> scenes;
+    private static Scene currentScene;
+    private static EnumMap<State, Scene> scenes;
 
     public static void init(State startingState) {
-        scenes = new HashMap<>();
+        scenes = new EnumMap<>(State.class);
 
         scenes.put(State.MENU_SCREEN, new MainMenu());
         scenes.put(State.MODE_SELECT, new GameModeSelect());
@@ -35,22 +33,22 @@ public class StateManager {
         scenes.put(State.STATS_SCREEN, new MainMenu());
         scenes.put(State.QUIT_GAME, new ConfirmExit(State.MENU_SCREEN, State.KILL_GAME));
 
-        CurrentScene = scenes.get(startingState);
+        currentScene = scenes.get(startingState);
     }
 
     public static void setCurrentScene(Scene scene) {
-        CurrentScene = scene;
+        currentScene = scene;
     }
 
     public static Scene getCurrentScene() {
-        return CurrentScene;
+        return currentScene;
     }
 
     public static void setCurrentScene(State state) {
-        CurrentScene = scenes.get(state);
+        currentScene = scenes.get(state);
     }
 
-    public void dispose() {
+    public static void dispose() {
         for (Scene scene : scenes.values()) {
             scene.dispose();
         }
