@@ -143,7 +143,28 @@ public class GraphTest {
 	    g.addConnection(0, 1, 10);
 	    assertSame(g.getWeight(0, 1), 10);
     }
-
+	
+	/**
+	 * assure that removing a neighbor will make it no longer
+	 * show up in the neighbors set.
+	 */
+	@Test public void testRemoveNeighborWorks() {
+		g.getNeighbors(0);
+		g.removeNeighbor(0, 1);
+		assertTrue(!g.getNeighbors(0).contains(1));
+	}
+	
+	/**
+	 * assure that a is removed as a neighbor from b, AND
+	 * that b is removed as a neighbor from a. 
+	 */
+	@Test public void testRemoveNeighborRemovesBothNeighbors() {
+		g.getNeighbors(0);
+		g.removeNeighbor(0, 1);
+		assertTrue(!g.getNeighbors(0).contains(1));
+		assertTrue(!g.getNeighbors(1).contains(0));
+	}
+	
     /**
      * Sanity check for minInQueue.
      */

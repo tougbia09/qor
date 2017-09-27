@@ -35,7 +35,7 @@ public class MainMenu implements Scene {
                 225)
         );
         buttons.add(new Button(
-                FileManager.getTexture("quit.png"),
+                FileManager.getTexture("quit game.png"),
                 State.QUIT_GAME,
                 Constant.LARGE_BUTTON_CENTER,
                 25)

@@ -125,6 +125,21 @@ public class Graph {
             return neighbors;
         }
     }
+    
+    /**
+     * disconnect two nodes if they are neighbors. This will remove
+     * neighbors from both nodeA, and nodeB.
+     * @param nodeA node to check
+     * @param nodeB neighbor to remove
+     */
+    public void removeNeighbor(int nodeA, int nodeB) {
+    	Set<Integer> neighbors = this.allNeighbors.get(nodeA);
+    	neighbors.remove(nodeB);
+    	this.allNeighbors.put(nodeA, neighbors);
+    	neighbors = this.getNeighbors(nodeB);
+    	neighbors.remove(nodeA);
+    	this.allNeighbors.put(nodeB, neighbors);
+    }
 
     /**
      * This function is used to access a hash map entry that is defined

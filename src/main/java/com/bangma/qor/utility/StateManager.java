@@ -5,6 +5,8 @@ import com.bangma.qor.scenes.ConfirmExit;
 import com.bangma.qor.scenes.GameBoard;
 import com.bangma.qor.scenes.GameModeSelect;
 import com.bangma.qor.scenes.MainMenu;
+import com.bangma.qor.scenes.WinScreen;
+
 import java.util.EnumMap;
 
 public class StateManager {
@@ -30,6 +32,8 @@ public class StateManager {
         scenes.put(State.MODE_SELECT, new GameModeSelect());
         scenes.put(State.GAME_1P, new GameBoard(State.GAME_1P));
         scenes.put(State.GAME_2P, new GameBoard(State.GAME_2P));
+        scenes.put(State.PLAYER_ONE_WIN, new WinScreen(true));
+        scenes.put(State.PLAYER_TWO_WIN, new WinScreen(false));
         scenes.put(State.STATS_SCREEN, new MainMenu());
         scenes.put(State.QUIT_GAME, new ConfirmExit(State.MENU_SCREEN, State.KILL_GAME));
 
