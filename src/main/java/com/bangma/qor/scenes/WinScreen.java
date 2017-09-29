@@ -13,13 +13,11 @@ import com.bangma.qor.utility.FileManager;
 import com.bangma.qor.utility.StateManager.State;
 
 public class WinScreen implements Scene {
-	private final boolean playerOneWin;
 	private final Texture background;
 	private final List<Button> buttons;
 	private SpriteBatch batch;
 	
 	public WinScreen(boolean playerOneWin) {
-		this.playerOneWin = playerOneWin;
 		if (playerOneWin) background = FileManager.getTexture("winner player one.png");
 		else background = FileManager.getTexture("winner player two.png");
 		batch = new SpriteBatch();

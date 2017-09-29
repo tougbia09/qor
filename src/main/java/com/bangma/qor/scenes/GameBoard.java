@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -17,7 +18,9 @@ import com.bangma.qor.objects.Square;
 import com.bangma.qor.objects.Wall;
 import com.bangma.qor.utility.FileManager;
 import com.bangma.qor.utility.StateManager;
-
+import java.awt.Desktop;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 
 import static com.bangma.qor.utility.StateManager.State;
@@ -43,22 +46,27 @@ public class GameBoard implements Scene {
     private Wall hoveredWall;
     private Texture playerOneWall;
     private Texture playerTwoWall;
-    
+    private BitmapFont fontOne;
+    private BitmapFont fontTwo;
     /**
      * Create an instance of GameBoard.
      * @param gameMode State; either one player or two player
      */
     public GameBoard(State gameMode) {
-        buttons = new ArrayList<>(2);
-        squares = new HashMap<>(81);
-        walls	= new HashMap<>();
-        batch 	= new SpriteBatch();
-        players = new HashMap<>(2);
-        placedWalls = new ArrayList<>(20);
+        buttons 		= new ArrayList<>(2);
+        squares 		= new HashMap<>(81);
+        walls			= new HashMap<>();
+        batch 			= new SpriteBatch();
+        players 		= new HashMap<>(2);
+        placedWalls 	= new ArrayList<>(20);
+        fontOne			= new BitmapFont();
+        fontTwo			= new BitmapFont();
+        this.gameMode 	= gameMode;
+        hoveredSquare 	= null;
         
-        this.gameMode = gameMode;
-        hoveredSquare = null;
-
+        fontOne.getData().setScale(8f, 8f);
+        fontTwo.getData().setScale(8f, 8f);
+        
         buttons.add(new Button(
                 FileManager.getTexture("reset.png"),
                 this.gameMode,
@@ -86,19 +94,22 @@ public class GameBoard implements Scene {
     public void update(Vector2 mousePosition) {
         input();
         Button.buttonClick(buttons, mousePosition);
-        hoveredSquare 	= squareHover(squares, mousePosition);
-        hoveredWall		= wallHover(walls, mousePosition);
+        hoveredSquare 		= squareHover(squares, mousePosition);
+        hoveredWall			= wallHover(walls, mousePosition);
+        boolean wallPlaced 	= false;
+        boolean charMoved	= false;
+        
         
         // confirm that the mouse has been clicked over a square that isnt either players position.
-
         if (Gdx.input.justTouched()) {
         	if (hoveredSquare != null) {
         		players.get(turn).move(hoveredSquare.getGridPosition());
+        		charMoved = true;
         	}
             if (hoveredWall != null) {
-            	placeNewWall();
+            	wallPlaced = placeNewWall();
             }
-            if (hoveredWall != null || hoveredSquare != null) {
+            if (wallPlaced || charMoved) {
             	turn = !turn;
             }
         }
@@ -109,6 +120,8 @@ public class GameBoard implements Scene {
         if (graph.convertTupleToId(players.get(false).getGridPosition()) < 9) {
             StateManager.setCurrentScene(State.PLAYER_TWO_WIN);
         }
+        if (players.get(true).getRemainingWalls() == 0)  fontOne.setColor(Color.RED);
+        if (players.get(false).getRemainingWalls() == 0)  fontTwo.setColor(Color.RED);
     }
 
     /**
@@ -137,6 +150,12 @@ public class GameBoard implements Scene {
         for (Sprite wall : placedWalls) wall.draw(batch);
         players.get(true).draw(batch);
         players.get(false).draw(batch);
+        fontOne.draw(batch, 
+        		String.format("%02d", players.get(true).getRemainingWalls()),
+        		215f, Constant.SCREEN_SIZE - 30f);
+        fontTwo.draw(batch, 
+        		String.format("%02d", players.get(false).getRemainingWalls()),
+        		Constant.SCREEN_SIZE - 240f, Constant.SCREEN_SIZE - 30f);
         batch.end();
     }
 
@@ -202,7 +221,10 @@ public class GameBoard implements Scene {
             if (s.getBoundingRectangle().contains(mousePosition) &&
                     !s.getGridPosition().equals(players.get(false).getGridPosition()) &&
                     !s.getGridPosition().equals(players.get(true).getGridPosition()) &&
-                    graph.areNeighbors(players.get(turn).getGridPosition(), s.getGridPosition())) {
+                    graph.neighborExists(
+                		graph.convertTupleToId( players.get(turn).getGridPosition() ), 
+                		graph.convertTupleToId( s.getGridPosition() )
+            		)) {
                 s.setAlpha(0.7f);
                 hovered = s;
                 break;
@@ -217,19 +239,24 @@ public class GameBoard implements Scene {
      * This function checks each wall given as walls, to see if the vector mousePosition
      * is inside of it. This function is facilitated by the rectangle collision provided
      * by the libgdx classes; Sprite, and Rectangle.
+     * 
      * @param walls the list of walls to check against.
      * @param mousePosition the position of the mouse in pixels.
      * @return the wall that is being hovered, or null.
      */
     public Wall wallHover(Map<String, Wall> walls, Vector2 mousePosition) {
+    	if (players.get(turn).getRemainingWalls() == 0) return null;
     	Wall hovered = null;
     	for (Wall w : walls.values()) {
+    		Tuple<Integer> pos = w.getGridPosition();
+    		int id = graph.convertTupleToId(pos);
+    		
 	    	if (w.getBoundingRectangle().contains(mousePosition)) {
 	            w.setAlpha(0.7f);
 	            hovered = w;
 	            break;
 	    	} else {
-                w.setAlpha(1);
+                w.setAlpha(0);
             }
         }
     	return hovered;
@@ -242,7 +269,8 @@ public class GameBoard implements Scene {
      * exception is when you click one of the edges on the top row or the far right column, 
      * the wall will be placed so that it stays in bounds.
      */
-    public void placeNewWall() {
+    public boolean placeNewWall() {
+    	if (players.get(turn).getRemainingWalls() == 0) {return false;}
     	Sprite newWall;
     	if (turn) newWall = new Sprite(playerOneWall);
     	else newWall = new Sprite(playerTwoWall);
@@ -250,38 +278,47 @@ public class GameBoard implements Scene {
     	int id = graph.convertTupleToId(hoveredWall.getGridPosition());
     	
     	if (hoveredWall.orientation == 'h') {
-    		graph.getNeighbors(id);
-    		graph.removeNeighbor(id, id + 9);
     		if (pos.x() == 8) {
-    			graph.getNeighbors(id - 1);
-    			graph.removeNeighbor(id - 1, id + 9 - 1);
         		newWall.setX(hoveredWall.getX() + 1 - Constant.SQUARE_SIZE / 2f);
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE / 2f);
+            	graph.removeNeighbor(id-1, id-1 + 9);
         	} else {
-        		graph.getNeighbors(id + 1);
-        		graph.removeNeighbor(id + 1, id + 9 + 1);
         		newWall.setX(hoveredWall.getX() + 1 + Constant.SQUARE_SIZE / 2f);
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE / 2f);
+            	graph.removeNeighbor(id+1, id+1 + 9);
         	}
+    		newWall.rotate(90);
+    		graph.removeNeighbor(id, id + 9);
     	}
     	if (hoveredWall.orientation == 'v') {
-    		graph.getNeighbors(id);
-    		graph.removeNeighbor(id, id - 1);
         	if (pos.y() == 8) {
-        		graph.getNeighbors(id - 9);
-        		graph.removeNeighbor(id - 9, id - 9 - 1);
         		newWall.setX(hoveredWall.getX());
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE);
         	} else {
-        		graph.getNeighbors(id + 9);
-        		graph.removeNeighbor(id + 9, id + 9 - 1);
         		newWall.setX(hoveredWall.getX());
             	newWall.setY(hoveredWall.getY());
         	}
+        	graph.removeNeighbor(id, id - 1);
     	}
-    	if (hoveredWall.orientation == 'h') {
-    		newWall.rotate(90);
-    	}
+    	
     	placedWalls.add(newWall);
+    	players.get(turn).decrementWalls();
+    	return true;
+    }
+    
+    /**
+     * Open the rules of the game on wikipedia.
+     */
+    public static void openHelp() {
+    	URI uri;
+    	try {
+    		uri = new URL("https://en.wikipedia.org/wiki/Quoridor#Rules_of_the_game").toURI();
+    		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+                desktop.browse(uri);
+            }
+        } catch (Exception e) {
+            return;
+        }
     }
 }

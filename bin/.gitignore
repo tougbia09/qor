@@ -1,2 +1,7 @@
+/tests/
+/sceneTests/
+/testableGameInterfaces/
+/interfaces/
+/testable/
 /com/
-/mathTests/
+/testableTests/

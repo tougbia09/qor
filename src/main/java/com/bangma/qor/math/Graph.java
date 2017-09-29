@@ -127,13 +127,28 @@ public class Graph {
     }
     
     /**
+     * Check if a there is a connection between two nodes.
+     * Using ids to check with.
+     * @param nodeA node to check
+     * @param nodeB node to check
+     * @return true if a connection exists, false otherwise
+     */
+    public boolean neighborExists(int nodeA, int nodeB) {
+    	if (this.allNeighbors.get(nodeA) == null) getNeighbors(nodeA);
+    	return this.allNeighbors.get(nodeA).contains(nodeB);
+    }
+    
+    /**
      * disconnect two nodes if they are neighbors. This will remove
      * neighbors from both nodeA, and nodeB.
      * @param nodeA node to check
      * @param nodeB neighbor to remove
      */
     public void removeNeighbor(int nodeA, int nodeB) {
-    	Set<Integer> neighbors = this.allNeighbors.get(nodeA);
+    	Set<Integer> neighbors = (this.allNeighbors.get(nodeA) == null) 
+			? getNeighbors(nodeA) 
+			: this.allNeighbors.get(nodeA);
+			
     	neighbors.remove(nodeB);
     	this.allNeighbors.put(nodeA, neighbors);
     	neighbors = this.getNeighbors(nodeB);
@@ -201,12 +216,6 @@ public class Graph {
         }
         path.push(u);
         return path;
-    }
-
-    public boolean areNeighbors(Tuple<Integer> a, Tuple<Integer> b) {
-        int nodeA = convertTupleToId(a);
-        int nodeB = convertTupleToId(b);
-        return getNeighbors(nodeA).contains(nodeB);
     }
 
     /**

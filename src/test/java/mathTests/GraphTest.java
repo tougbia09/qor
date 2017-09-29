@@ -282,4 +282,15 @@ public class GraphTest {
         Tuple<Integer> tuple = new Tuple<>(2, 1);
         assertSame(g.convertTupleToId(tuple), 5);
     }
+    
+    @Test public void testNeighborExistsReturnsTrueForExistingConnections() {
+    	g.getNeighbors(0);
+    	assertTrue(g.neighborExists(0, 1));
+    }
+    
+    @Test public void testNeighborExistsReturnsFalseForNonExistantConnections() {
+    	g.getNeighbors(0);
+    	assertFalse(g.neighborExists(0, -1));
+    	assertFalse(g.neighborExists(0, 4));
+    }
 }

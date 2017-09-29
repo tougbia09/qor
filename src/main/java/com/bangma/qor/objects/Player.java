@@ -32,4 +32,7 @@ public class Player extends Sprite {
     public int getRemainingWalls() {
         return this.walls;
     }
+    public void decrementWalls() {
+    	this.walls--;
+    }
 }

@@ -14,6 +14,8 @@ allprojects {
     apply plugin: "idea"
 	apply plugin: "java"
 	
+	sourceSets.test.java.srcDirs = ["/src/test/java"]
+	
     version = '1.0'
     ext {
         appName = "qor"
@@ -37,7 +39,15 @@ allprojects {
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        testCompile 'junit:junit:4.12'
+        
+        testCompile "junit:junit:4.12"
+	    testCompile "org.mockito:mockito-core:2.2.7"
+	
+	    testCompile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+	    testCompile "com.badlogicgames.gdx:gdx:$gdxVersion"
+	    testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+	    testCompile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+	    testCompile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
     }
 }
 
