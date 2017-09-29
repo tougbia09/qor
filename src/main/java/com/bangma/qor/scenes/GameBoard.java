@@ -248,9 +248,6 @@ public class GameBoard implements Scene {
     	if (players.get(turn).getRemainingWalls() == 0) return null;
     	Wall hovered = null;
     	for (Wall w : walls.values()) {
-    		Tuple<Integer> pos = w.getGridPosition();
-    		int id = graph.convertTupleToId(pos);
-    		
 	    	if (w.getBoundingRectangle().contains(mousePosition)) {
 	            w.setAlpha(0.7f);
 	            hovered = w;

@@ -29,20 +29,12 @@ public class GraphUpdater {
      * @return true if a wall can be placed, false otherwise.
      */
     public boolean wallAllowed(int n, int x, int y, char o) {
-    	if (o == 'h' && x != 8) {
+    	if (o == 'h' && x != width - 1) {
 			if (!regularHorizontalWallAllowed(n)) return false;
-		} else if (o == 'v' && y == 8) {
-			if (
-				!graph.neighborExists(n, n - 1) ||
-				!graph.neighborExists(n, n - 9) ||
-				!graph.neighborExists(n-1, n-1 - 9)
-			) { return false; }
+		} else if (o == 'v' && y == width - 1) {
+			if (!edgeVerticalWallAllowed(n)) { return false; }
 		} else {
-			if (
-				!graph.neighborExists(n, n - 1) ||
-				!graph.neighborExists(n, n + 9) ||
-				!graph.neighborExists(n-1, n-1 -+9)
-			) { return false; }
+			if (!edgeHorizontalWallAllowed(n)) { return false; }
 		}
     	return true;
     }
@@ -60,7 +52,25 @@ public class GraphUpdater {
 			&& graph.neighborExists(n, n + width) 
 			&& graph.neighborExists(n+1, n+1 + width);
     }
-
+    public boolean edgeVerticalWallAllowed(int n) {
+    	return graph.neighborExists(n, n-1) 
+			&& graph.neighborExists(n, n - width) 
+			&& graph.neighborExists(n-1, n-1 - width);
+    }
+    public boolean edgeHorizontalWallAllowed(int n) {
+    	return graph.neighborExists(n, n - 1) 
+			&& graph.neighborExists(n, n + width) 
+			&& graph.neighborExists(n-1, n-1 + width);
+    }
+    /**
+     * The conditions for a vertical wall and a horizontal wall
+     * being placed on the top edge are the same.
+     * @param n the node id to check.
+     * @return true if possible, false otherwise.
+     */
+    public boolean regularVerticalWallAllowed(int n) { 
+    	return edgeHorizontalWallAllowed(n); 
+	}
 	public Graph getGraph() {
 		return graph;
 	}
