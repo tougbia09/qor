@@ -21,7 +21,7 @@ public class Graph {
     private Set<Integer> allNodes;
     private Map<String, Integer> allWeights;
     private Map<Integer, Set<Integer>> allNeighbors;
-
+    
     /**
      * @param width width in nodes of the graph.
      * @param height height in nodes of the graph.
@@ -265,7 +265,7 @@ public class Graph {
 
     }
 
-    public int              getWIDTH()      { return width; }
+    public int              getWidth()      { return width; }
     public int              getHEIGHT()     { return height; }
     public Set<Integer>     getAllNodes()   { return allNodes; }
 }

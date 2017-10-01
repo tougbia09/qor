@@ -45,7 +45,7 @@ public class GraphTest {
      */
 	@Test public void testHeightAndWidthAssignment() {
 		assertSame(g.getHEIGHT(), h);
-		assertSame(g.getWIDTH(), w);
+		assertSame(g.getWidth(), w);
 	}
 
     /**

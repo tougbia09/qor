@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.bangma.qor.config.Constant;
 import com.bangma.qor.math.Graph;
 import com.bangma.qor.math.Position;
+import com.bangma.qor.math.WallVector;
 import com.bangma.qor.objects.Button;
 import com.bangma.qor.objects.Player;
 import com.bangma.qor.objects.Scene;
@@ -18,6 +19,9 @@ import com.bangma.qor.objects.Square;
 import com.bangma.qor.objects.Wall;
 import com.bangma.qor.utility.FileManager;
 import com.bangma.qor.utility.StateManager;
+
+import testable.GraphUpdater;
+
 import java.awt.Desktop;
 import java.net.URI;
 import java.net.URL;
@@ -40,6 +44,7 @@ public class GameBoard implements Scene {
     private Map<Integer, Square> squares;
     private Map<String, Wall> walls;
     private Graph graph;
+    private GraphUpdater graphUpdater;
     private Map<Boolean, Player> players;
     private boolean turn = true; // true for player one, false for player two.
     private Square hoveredSquare;
@@ -48,6 +53,7 @@ public class GameBoard implements Scene {
     private Texture playerTwoWall;
     private BitmapFont fontOne;
     private BitmapFont fontTwo;
+    private WallVector wallToPlace;
     /**
      * Create an instance of GameBoard.
      * @param gameMode State; either one player or two player
@@ -85,7 +91,7 @@ public class GameBoard implements Scene {
         playerTwoWall = FileManager.getTexture("placed wall player two.png");
         players.put(true , new Player(FileManager.getTexture("playerOne.png"), 4, 0));
         players.put(false, new Player(FileManager.getTexture("playerTwo.png"), 4, 8));
-        
+        wallToPlace = null;
         setupGameBoard();
     }
     /**
@@ -179,7 +185,8 @@ public class GameBoard implements Scene {
      */
     private void setupGameBoard() {
         graph = new Graph(9,9);
-
+        graphUpdater = new GraphUpdater(graph);
+        
         Texture squareTexture 	= FileManager.getTexture("hover.png");
         Texture wallTexture   	= FileManager.getTexture("wall.png");
         
@@ -216,6 +223,7 @@ public class GameBoard implements Scene {
      * @return the square being hovered over or null.
      */
     public Square squareHover(Map<Integer, Square> squares, Vector2 mousePosition) {
+    	wallToPlace = null;
         Square hovered = null;
         for (Square s : squares.values()) {
             if (s.getBoundingRectangle().contains(mousePosition) &&
@@ -249,9 +257,13 @@ public class GameBoard implements Scene {
     	Wall hovered = null;
     	for (Wall w : walls.values()) {
 	    	if (w.getBoundingRectangle().contains(mousePosition)) {
-	            w.setAlpha(0.7f);
-	            hovered = w;
-	            break;
+	    		WallVector possibleWall = WallVector.createWallVector(w.getGridPosition(), w.orientation, graph);
+	    		if (graphUpdater.wallAllowed(possibleWall)) {
+	    			w.setAlpha(0.7f);
+		            hovered = w;
+		            wallToPlace = possibleWall;
+		            break;
+	    		}
 	    	} else {
                 w.setAlpha(0);
             }
@@ -272,20 +284,16 @@ public class GameBoard implements Scene {
     	if (turn) newWall = new Sprite(playerOneWall);
     	else newWall = new Sprite(playerTwoWall);
     	Position pos = hoveredWall.getGridPosition();
-    	int id = graph.convertTupleToId(hoveredWall.getGridPosition());
     	
     	if (hoveredWall.orientation == 'h') {
     		if (pos.x == 8) {
         		newWall.setX(hoveredWall.getX() + 1 - Constant.SQUARE_SIZE / 2f);
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE / 2f);
-            	graph.removeNeighbor(id-1, id-1 + 9);
         	} else {
         		newWall.setX(hoveredWall.getX() + 1 + Constant.SQUARE_SIZE / 2f);
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE / 2f);
-            	graph.removeNeighbor(id+1, id+1 + 9);
         	}
     		newWall.rotate(90);
-    		graph.removeNeighbor(id, id + 9);
     	}
     	if (hoveredWall.orientation == 'v') {
         	if (pos.y == 8) {
@@ -295,10 +303,10 @@ public class GameBoard implements Scene {
         		newWall.setX(hoveredWall.getX());
             	newWall.setY(hoveredWall.getY());
         	}
-        	graph.removeNeighbor(id, id - 1);
     	}
     	
-    	placedWalls.add(newWall);
+    	placedWalls.add(newWall); // place visual wall
+    	graphUpdater.placeWall(wallToPlace); 
     	players.get(turn).decrementWalls();
     	return true;
     }
@@ -306,7 +314,7 @@ public class GameBoard implements Scene {
     /**
      * Open the rules of the game on wikipedia.
      */
-    public static void openHelp() {
+    private static void openHelp() {
     	URI uri;
     	try {
     		uri = new URL("https://en.wikipedia.org/wiki/Quoridor#Rules_of_the_game").toURI();

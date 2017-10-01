@@ -59,4 +59,24 @@ public class WallVector {
 	public WallVector add(int v) {
 		return new WallVector(a+v,b+v,o);
 	}
+	
+	/**
+	 * Create a WallVector object from a position on a grid
+	 * @param p the (x,y) Position object
+	 * @param orientation the orientation of the new WallVector
+	 * @param g the graph to create with
+	 * @return a new WallVector appropriate for Graph g.
+	 */
+	public static WallVector createWallVector(Position p, char orientation, Graph g) {
+		int a = g.convertTupleToId(p);
+		int b;
+		if (orientation == 'h') {
+			if (p.x == g.getWidth() - 1) b = a - 1;
+			else b = a + 1;
+		} else {
+			if (p.y == g.getWidth() - 1) b = a - g.getWidth();
+			else b = a + g.getWidth();
+		}
+		return new WallVector(a, b, orientation);
+	}
 }

@@ -21,7 +21,7 @@ public class GraphUpdater {
 	 */
 	public GraphUpdater(Graph graph) {
 		this.graph = graph;
-		width = graph.getWIDTH();
+		width = graph.getWidth();
 		walls = new ArrayList<>();
 	}
 	
@@ -41,7 +41,7 @@ public class GraphUpdater {
     	if (walls.isEmpty()) return true;
     	
     	// makes the walls-on-same-axis check cleaner
-    	int shifter = (newWall.o == 'v') ? graph.getWIDTH() : 1;
+    	int shifter = (newWall.o == 'v') ? graph.getWidth() : 1;
     	
     	// iterate through all the previously placed walls to check for possible issues.
     	for (WallVector w : this.walls) {
@@ -61,7 +61,20 @@ public class GraphUpdater {
     	return true;
     }
 	
+    public void placeWall(WallVector w) { 
+    	walls.add(w);
+    	if (w.o == 'v') {
+    		graph.removeNeighbor(w.a, w.a - 1);
+    		graph.removeNeighbor(w.b, w.b - 1);
+    	} else {
+    		graph.removeNeighbor(w.a, w.a + 9);
+    		graph.removeNeighbor(w.b, w.b + 9);
+    	}
+    	
+	}
+    
     public void 			placeWall(int a, int b, char o) { walls.add(new WallVector(a, b, o)); }
+    
 	public List<WallVector> getWalls() 						{ return walls; }
 	public Graph 			getGraph() 						{ return graph; }
 }
