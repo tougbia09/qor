@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.bangma.qor.config.Constant;
 import com.bangma.qor.math.Graph;
-import com.bangma.qor.math.Tuple;
+import com.bangma.qor.math.Position;
 import com.bangma.qor.objects.Button;
 import com.bangma.qor.objects.Player;
 import com.bangma.qor.objects.Scene;
@@ -185,7 +185,7 @@ public class GameBoard implements Scene {
         
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                int id = graph.convertTupleToId(new Tuple<>(i, j));
+                int id = graph.convertTupleToId(new Position(i, j));
                 squares.put(id, new Square( squareTexture, i, j,
                         Constant.GRID_OFFSET_X + i*Constant.SQUARE_SIZE + 9,
                         Constant.GRID_OFFSET_Y + j*Constant.SQUARE_SIZE + 8
@@ -271,11 +271,11 @@ public class GameBoard implements Scene {
     	Sprite newWall;
     	if (turn) newWall = new Sprite(playerOneWall);
     	else newWall = new Sprite(playerTwoWall);
-    	Tuple<Integer> pos = hoveredWall.getGridPosition();
+    	Position pos = hoveredWall.getGridPosition();
     	int id = graph.convertTupleToId(hoveredWall.getGridPosition());
     	
     	if (hoveredWall.orientation == 'h') {
-    		if (pos.x() == 8) {
+    		if (pos.x == 8) {
         		newWall.setX(hoveredWall.getX() + 1 - Constant.SQUARE_SIZE / 2f);
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE / 2f);
             	graph.removeNeighbor(id-1, id-1 + 9);
@@ -288,7 +288,7 @@ public class GameBoard implements Scene {
     		graph.removeNeighbor(id, id + 9);
     	}
     	if (hoveredWall.orientation == 'v') {
-        	if (pos.y() == 8) {
+        	if (pos.y == 8) {
         		newWall.setX(hoveredWall.getX());
             	newWall.setY(hoveredWall.getY() - Constant.SQUARE_SIZE);
         	} else {

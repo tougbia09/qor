@@ -3,7 +3,7 @@ package mathTests;
 import java.util.*;
 import org.junit.*;
 import com.bangma.qor.math.Graph;
-import com.bangma.qor.math.Tuple;
+import com.bangma.qor.math.Position;
 
 import static org.junit.Assert.*;
 
@@ -256,30 +256,30 @@ public class GraphTest {
         assertSame(path.pop(), 3);
     }
     @Test public void testIdConversionToTupleZero() {
-        Tuple<Integer> tuple = g.convertIdToTuple(0);
-        assertSame(tuple.x(), 0);
-        assertSame(tuple.y(), 0);
+        Position tuple = g.convertIdToTuple(0);
+        assertSame(tuple.x, 0);
+        assertSame(tuple.y, 0);
     }
     @Test public void testIdConversionToTupleTwo() {
-        Tuple<Integer> tuple = g.convertIdToTuple(2);
-        assertSame(tuple.x(), 2);
-        assertSame(tuple.y(), 0);
+        Position tuple = g.convertIdToTuple(2);
+        assertSame(tuple.x, 2);
+        assertSame(tuple.y, 0);
     }
     @Test public void testIdConversionToTupleFour() {
-        Tuple<Integer> tuple = g.convertIdToTuple(4);
-        assertSame(tuple.x(), 1);
-        assertSame(tuple.y(), 1);
+        Position tuple = g.convertIdToTuple(4);
+        assertSame(tuple.x, 1);
+        assertSame(tuple.y, 1);
     }
     @Test public void testTupleConversionToIdOne() {
-        Tuple<Integer> tuple = new Tuple<>(1, 0);
+        Position tuple = new Position(1, 0);
         assertSame(g.convertTupleToId(tuple), 1);
     }
     @Test public void testTupleConversionToIdThree() {
-        Tuple<Integer> tuple = new Tuple<>(0, 1);
+        Position tuple = new Position(0, 1);
         assertSame(g.convertTupleToId(tuple), 3);
     }
     @Test public void testTupleConversionToIdFive() {
-        Tuple<Integer> tuple = new Tuple<>(2, 1);
+        Position tuple = new Position(2, 1);
         assertSame(g.convertTupleToId(tuple), 5);
     }
     

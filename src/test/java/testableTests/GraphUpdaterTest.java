@@ -5,13 +5,21 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import com.bangma.qor.math.Graph;
-import com.bangma.qor.math.Tuple;
+import com.bangma.qor.math.WallVector;
 
 import testable.GraphUpdater;
 
 public class GraphUpdaterTest {
 	private Graph graph;
 	private GraphUpdater updater;
+	
+	private final int graphWidth = 3;
+	
+	private final int[] legalRegularHorizontalWalls = new int[] { 0, 1, 3, 4 };
+	private final int[] legalRegularVerticalWalls 	= new int[] { 1, 2, 4, 5 };
+	private final int[] legalEdgeHorizontalWalls 	= new int[] { 2, 5 };
+	private final int[] legalEdgeVerticalWalls 		= new int[] { 7, 8 };
+	
 	
 	/* TESTED WITH 3 x 3 GRID 		
 	 * ALL WALLS ARE PLACED ABOVE / LEFT OF THE SOURCE NODE
@@ -27,7 +35,7 @@ public class GraphUpdaterTest {
 	 */
 	
 	@Before() public void setup() {
-		graph = new Graph(3,3);
+		graph = new Graph(graphWidth, graphWidth);
 		updater = new GraphUpdater(graph);
 	}
 	
@@ -36,34 +44,36 @@ public class GraphUpdaterTest {
 		assertSame(updater.getGraph(), graph);
 	}
 	
-	@Test public void testRegularHorizontalWallAllowed() {
-		for (int n : new int[] { 0, 1, 3, 4 }) 		assertTrue(updater.regularHorizontalWallAllowed(n));
-		for (int n : new int[] { 2, 5, 8, 6, 7 }) 	assertFalse(updater.regularHorizontalWallAllowed(n));
+	@Test public void testWallAllowedOnEmptyGraph() {
+		for (int i : legalRegularHorizontalWalls) {
+			assertTrue(updater.wallAllowed(new WallVector(i, i + 1, 'h')));
+		}
+		for (int i : legalRegularVerticalWalls) {
+			assertTrue(updater.wallAllowed(new WallVector(i, i + graphWidth, 'v')));
+		}
+		for (int i : legalEdgeHorizontalWalls) {
+			assertTrue(updater.wallAllowed(new WallVector(i, i - 1, 'h')));
+		}
+		for (int i : legalEdgeVerticalWalls) {
+			assertTrue(updater.wallAllowed(new WallVector(i, i - graphWidth, 'v')));
+		}
 	}
-	@Test public void testEdgeVerticalWallAllowed() {
-		for (int n : new int[] { 4, 5, 7, 8 }) 		assertTrue(updater.edgeVerticalWallAllowed(n));
-		for (int n : new int[] { 0, 1, 2, 3, 6 }) 	assertFalse(updater.edgeVerticalWallAllowed(n));
+	
+	@Test public void testWallAllowedWithHorizontalWallPlaced() {
+		updater.placeWall(0, 1, 'h');
+		assertFalse(updater.wallAllowed(new WallVector(1, 4, 'v')));
+		
+		assertTrue(updater.wallAllowed(new WallVector(4, 7, 'v')));
+		assertTrue(updater.wallAllowed(new WallVector(2, 5, 'v')));
+		assertTrue(updater.wallAllowed(new WallVector(5, 8, 'v')));
 	}
-	@Test public void testEdgeHorizontalWallAllowed() {
-		for (int n : new int[] { 1, 2, 4, 5 }) 		assertTrue(updater.edgeHorizontalWallAllowed(n));
-		for (int n : new int[] { 0, 3, 6, 7, 8 }) 	assertFalse(updater.edgeHorizontalWallAllowed(n));
-	}
-	@Test public void testWallAllowed() {
-		for (int n : new int[] { 0, 1, 2, 3, 4, 5 }) { 
-			Tuple<Integer> pos = graph.convertIdToTuple(n);
-			assertTrue(updater.wallAllowed(n, pos.x(), pos.y(), 'h')); 
-		}
-		for (int n : new int[] { 6, 7, 8 }) { 
-			Tuple<Integer> pos = graph.convertIdToTuple(n);
-			assertFalse(updater.wallAllowed(n, pos.x(), pos.y(), 'h')); 
-		}
-		for (int n : new int[] { 1, 2, 4, 5, 7, 8 }) { 
-			Tuple<Integer> pos = graph.convertIdToTuple(n);
-			assertTrue(updater.wallAllowed(n, pos.x(), pos.y(), 'v')); 
-		}
-		for (int n : new int[] { 0, 3, 6 }) { 
-			Tuple<Integer> pos = graph.convertIdToTuple(n);
-			assertFalse(updater.wallAllowed(n, pos.x(), pos.y(), 'v')); 
-		}
+	
+	@Test public void testWallAllowedWithVerticalWallPlaced() {
+		updater.placeWall(1, 4, 'v');
+		assertFalse(updater.wallAllowed(new WallVector(0, 1, 'h')));
+		
+		assertTrue(updater.wallAllowed(new WallVector(1, 2, 'h')));
+		assertTrue(updater.wallAllowed(new WallVector(4, 5, 'h')));
+		assertTrue(updater.wallAllowed(new WallVector(6, 7, 'h')));
 	}
 }

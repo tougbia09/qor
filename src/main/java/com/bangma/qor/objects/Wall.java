@@ -4,15 +4,15 @@ import java.util.Map;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bangma.qor.math.Tuple;
+import com.bangma.qor.math.Position;
 
 public class Wall extends Sprite {
-	private Tuple<Integer> gridPosition;
+	private Position gridPosition;
 	public final char orientation;
 	
     public Wall(Texture t, int gx, int gy, float px, float py, char orient) {
         super(t);
-        gridPosition = new Tuple<>(gx, gy);
+        gridPosition = new Position(gx, gy);
         this.setX(px);
         this.setY(py);
         this.orientation = orient;
@@ -23,7 +23,7 @@ public class Wall extends Sprite {
         	wall.draw(batch);
         }
     }
-    public Tuple<Integer> getGridPosition() {
+    public Position getGridPosition() {
         return gridPosition;
     }
 }

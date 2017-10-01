@@ -3,16 +3,16 @@ package com.bangma.qor.objects;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bangma.qor.math.Tuple;
+import com.bangma.qor.math.Position;
 
 import java.util.Map;
 
 public class Square extends Sprite {
-    private Tuple<Integer> gridPosition;
+    private Position gridPosition;
 
     public Square(Texture t, int gx, int gy, float px, float py) {
         super(t);
-        gridPosition = new Tuple<>(gx, gy);
+        gridPosition = new Position(gx, gy);
         this.setX(px);
         this.setY(py);
     }
@@ -22,7 +22,7 @@ public class Square extends Sprite {
             square.draw(batch);
         }
     }
-    public Tuple<Integer> getGridPosition() {
+    public Position getGridPosition() {
         return gridPosition;
     }
 }

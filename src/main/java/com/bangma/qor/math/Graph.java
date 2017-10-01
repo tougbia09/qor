@@ -48,8 +48,8 @@ public class Graph {
      * @param tuple an (x,y) pair
      * @return node id
      */
-    public int convertTupleToId(Tuple<Integer> tuple) {
-        return tuple.x() + tuple.y()*this.width;
+    public int convertTupleToId(Position tuple) {
+        return tuple.x + tuple.y*this.width;
     }
 
     /**
@@ -57,9 +57,9 @@ public class Graph {
      * @param id
      * @return
      */
-    public Tuple<Integer> convertIdToTuple(int id) {
+    public Position convertIdToTuple(int id) {
         int x = id % this.width;
-        return new Tuple<>(x, (id - x) / this.width);
+        return new Position(x, (id - x) / this.width);
     }
 
     /**
