@@ -1,8 +1,25 @@
-/tests/
-/sceneTests/
-/testableGameInterfaces/
-/interfaces/
-/testable/
+/2play.png
+/cpu.png
+/exit.png
+/game theme loop.ogg
+/gameboard.png
+/hover.png
+/menu background.png
+/menu.png
+/mode background.png
+/no.png
+/placed wall player one.png
+/placed wall player two.png
+/playerOne.png
+/playerTwo.png
+/quit background.png
+/quit game.png
+/quit.png
+/reset.png
+/start.png
+/stats.png
+/wall.png
+/winner player one.png
+/winner player two.png
+/yes.png
 /com/
-/testableTests/
-/mathTests/
