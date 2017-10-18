@@ -255,6 +255,18 @@ public class GraphTest {
         assertSame(path.pop(), 1);
         assertSame(path.pop(), 3);
     }
+    @Test public void testFindPathWithNineByNineGraph() {
+    	Graph graph = new Graph(9,9);
+    	assertTrue(graph.neighborExists(0, 1));
+    	assertTrue(graph.neighborExists(1, 2));
+    	assertTrue(graph.neighborExists(2, 3));
+    	assertTrue(graph.neighborExists(3, 4));
+    	assertTrue(graph.neighborExists(4, 5));
+    	assertTrue(graph.neighborExists(5, 6));
+    	assertTrue(graph.neighborExists(6, 7));
+    	assertTrue(graph.neighborExists(7, 8));
+    	assertTrue(graph.findPath(0, 8).size() < 10);
+    }
     @Test public void testIdConversionToTupleZero() {
         Position tuple = g.convertIdToTuple(0);
         assertSame(tuple.x, 0);

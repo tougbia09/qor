@@ -63,26 +63,20 @@ public class Graph {
     }
 
     /**
-     * Returns the weight between two nodes. If the edge exists and
-     * has a weight, it will return that value. It the edge exists
-     * but there is no entry for weight, it will default to a weight
-     * of {1}. This is for the grid based design of the project. To
-     * avoid this, create the weights ahead of time. If there is no
-     * neighbor, then this method returns Graph.NULL (-1).
+     * For this application, we do not need to worry about weights,
+     * all weights are the same.
+     * 
+     * Therefor, if there is a neighbor, return weight {1}.
+     * 
      * @param nodeOne source node
      * @param nodeTwo neighbor node
-     * @return the weight between the nodes, or Graph.NULL (-1)
+     * @return the weight between the nodes, or INF
      */
     public int getWeight(int nodeOne, int nodeTwo) {
-        String key = graphHash(nodeOne, nodeTwo);
-        if (this.allWeights.containsKey(key)) {
-            return this.allWeights.get(key);
-        } else if (this.allNeighbors.get(nodeOne).contains(nodeOne)) {
-            this.addConnection(nodeOne, nodeTwo, 1);
-            return 1;
-        } else {
-            return NULL;
+        if (this.neighborExists(nodeOne, nodeTwo)) {
+        	return 1;
         }
+        return INF;
     }
 
     /**
@@ -164,7 +158,8 @@ public class Graph {
      * @return a string hash in the format "n1,n2".
      */
     private static String graphHash(int n1, int n2) {
-        return n1 + "," + n2;
+    	if (n1 > n2) return n1 + "," + n2;
+    	else return n2 + "," + n1;
     }
 
     /**
@@ -211,6 +206,13 @@ public class Graph {
         Deque<Integer> path = new ArrayDeque<>();
         int u = destination;
         while(prev[u] != NULL) {
+        	if (path.size() > Math.pow(this.width, 2)) {
+        		System.out.println("cannot find a path...");
+        		for (int i : path) {
+        			System.out.print(i + " ");
+        		}
+        		break;
+        	}
             path.push(u);
             u = prev[u];
         }

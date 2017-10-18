@@ -14,6 +14,7 @@ import com.bangma.qor.math.Position;
 import com.bangma.qor.math.WallVector;
 import com.bangma.qor.objects.Button;
 import com.bangma.qor.objects.Player;
+import com.bangma.qor.objects.RobotPlayer;
 import com.bangma.qor.objects.Scene;
 import com.bangma.qor.objects.Square;
 import com.bangma.qor.objects.Wall;
@@ -36,51 +37,54 @@ import static com.bangma.qor.utility.StateManager.State;
  * @author tim bangma
  */
 public class GameBoard implements Scene {
-    private State gameMode;
-    private Texture background;
-    private SpriteBatch batch;
-    private List<Button> buttons;
-    private List<Sprite> placedWalls;
-    private Map<Integer, Square> squares;
-    private Map<String, Wall> walls;
-    private Graph graph;
-    private GraphUpdater graphUpdater;
-    private Map<Boolean, Player> players;
-    private boolean turn = true; // true for player one, false for player two.
-    private Square hoveredSquare;
-    private Wall hoveredWall;
-    private Texture playerOneWall;
-    private Texture playerTwoWall;
-    private BitmapFont fontOne;
-    private BitmapFont fontTwo;
-    private WallVector wallToPlace;
+    private State gameMode;					// One Player or Two Player Indicator
+    private Texture background;				// the background image to display. (the game board)
+    private SpriteBatch batch;				// the sprite batch for drawing images.
+    private List<Button> buttons;			// a list of all buttons on screen.
+    private List<Sprite> placedWalls;		// a list of walls that have been placed.
+    private Map<Integer, Square> squares;	// a list of all the gameboard squares on screen.
+    private Map<String, Wall> walls;		// a list of all the walls on the board.
+    private Graph graph;					// the mathematical representation of the board.
+    private GraphUpdater graphUpdater;		// tool for interacting with the graph.
+    private boolean turn = true; 			// turn toggle; true for player one, false for player two.
+    private Square hoveredSquare;			// placeholder for a square that is being hovered over.
+    private Wall hoveredWall;				// placeholder for a wall that is being hovered over.
+    private Texture playerOneWall;			// the image for player one's walls.
+    private Texture playerTwoWall;			// the image for player two's walls.
+    private BitmapFont fontOne;				// font for player one's wall counter.
+    private BitmapFont fontTwo;				// font for player two's wall counter.
+    private WallVector wallToPlace;			// verified position for a wall to go.
+    private Player currentPlayer;			// shortcut to whichever player is active.
+    private Player playerOne;				// the first player.
+    private RobotPlayer playerTwo;			// the second player.
+    
     /**
      * Create an instance of GameBoard.
      * @param gameMode State; either one player or two player
      */
     public GameBoard(State gameMode) {
         buttons 		= new ArrayList<>(2);
-        squares 		= new HashMap<>(81);
+        squares 		= new HashMap<>(81); // 9 x 9 board
         walls			= new HashMap<>();
         batch 			= new SpriteBatch();
-        players 		= new HashMap<>(2);
-        placedWalls 	= new ArrayList<>(20);
+        placedWalls 	= new ArrayList<>(20); // 10 walls x 2 players
         fontOne			= new BitmapFont();
         fontTwo			= new BitmapFont();
         this.gameMode 	= gameMode;
         hoveredSquare 	= null;
         
-        fontOne.getData().setScale(8f, 8f);
+        fontOne.getData().setScale(8f, 8f); // there has to be a better way :(
         fontTwo.getData().setScale(8f, 8f);
         
         buttons.add(new Button(
                 FileManager.getTexture("reset.png"),
-                this.gameMode,
+                this.gameMode, // what happens when you click this button.
                 Constant.SCREEN_SIZE - Constant.MINI_BUTTON_WIDTH - 10,
                 15
         ));
         buttons.add(new Button(
                 FileManager.getTexture("exit.png"),
+                // send the player to an exit confirmation, that returns you to the game or sends you to the menu.
                 new ConfirmExit(this.gameMode, State.MENU_SCREEN),
                 10,
                 15
@@ -89,11 +93,53 @@ public class GameBoard implements Scene {
         background = FileManager.getTexture("gameboard.png");
         playerOneWall = FileManager.getTexture("placed wall player one.png");
         playerTwoWall = FileManager.getTexture("placed wall player two.png");
-        players.put(true , new Player(FileManager.getTexture("playerOne.png"), 4, 0));
-        players.put(false, new Player(FileManager.getTexture("playerTwo.png"), 4, 8));
+        
+        playerOne = new Player(FileManager.getTexture("playerOne.png"), 4, 0);
+        playerTwo = new RobotPlayer(FileManager.getTexture("playerTwo.png"), 4, 8, playerOne);
         wallToPlace = null;
         setupGameBoard();
     }
+    
+    public void onePlayerTurn(boolean wallPlaced, boolean charMoved) {
+    	// confirm that the mouse has been clicked over a square that isnt either players position.
+        if (turn && Gdx.input.justTouched()) {
+        	if (hoveredSquare != null) {
+        		playerOne.move(hoveredSquare.getGridPosition());
+        		charMoved = true;
+        	}
+            if (hoveredWall != null) {
+            	wallPlaced = placeNewWall();
+            }
+            if (wallPlaced || charMoved) {
+            	changeTurn();
+            }
+        }
+        if (!turn) {
+        	playerTwo.update();
+        	playerTwo.makeOwnMove();
+        	changeTurn();
+        }
+    }
+    public void twoPlayerTurn(boolean wallPlaced, boolean charMoved) {
+    	// confirm that the mouse has been clicked over a square that isnt either players position.
+        if (Gdx.input.justTouched()) {
+        	if (hoveredSquare != null) {
+
+        		// move the player, who's turn it currently is.
+        		if (turn) playerOne.move(hoveredSquare.getGridPosition());
+        		else playerTwo.move(hoveredSquare.getGridPosition());
+        		
+        		charMoved = true;
+        	}
+            if (hoveredWall != null) {
+            	wallPlaced = placeNewWall();
+            }
+            if (wallPlaced || charMoved) {
+            	changeTurn();
+            }
+        }
+    }
+    
     /**
      * update the game world / objects in the game world each cycle (tick).
      */
@@ -105,29 +151,23 @@ public class GameBoard implements Scene {
         boolean wallPlaced 	= false;
         boolean charMoved	= false;
         
-        
-        // confirm that the mouse has been clicked over a square that isnt either players position.
-        if (Gdx.input.justTouched()) {
-        	if (hoveredSquare != null) {
-        		players.get(turn).move(hoveredSquare.getGridPosition());
-        		charMoved = true;
-        	}
-            if (hoveredWall != null) {
-            	wallPlaced = placeNewWall();
-            }
-            if (wallPlaced || charMoved) {
-            	turn = !turn;
-            }
+        if (this.gameMode == State.GAME_1P) { 
+        	// only allow mouse input to have an effect during the players turn.
+            onePlayerTurn(wallPlaced, charMoved);
+
+        } else { 
+        	// Allow input to control both players in two player mode.
+            twoPlayerTurn(wallPlaced, charMoved);
         }
 
-        if (graph.convertTupleToId(players.get(true).getGridPosition()) >= 72) {
+        if (graph.convertTupleToId(playerOne.getGridPosition()) >= 72) {
             StateManager.setCurrentScene(State.PLAYER_ONE_WIN);
         }
-        if (graph.convertTupleToId(players.get(false).getGridPosition()) < 9) {
+        if (graph.convertTupleToId(playerTwo.getGridPosition()) < 9) {
             StateManager.setCurrentScene(State.PLAYER_TWO_WIN);
         }
-        if (players.get(true).getRemainingWalls() == 0)  fontOne.setColor(Color.RED);
-        if (players.get(false).getRemainingWalls() == 0)  fontTwo.setColor(Color.RED);
+        if (playerOne.getRemainingWalls() == 0)  fontOne.setColor(Color.RED);
+        if (playerTwo.getRemainingWalls() == 0)  fontTwo.setColor(Color.RED);
     }
 
     /**
@@ -146,7 +186,9 @@ public class GameBoard implements Scene {
         batch.begin();
         batch.draw(background, 0, 0);
         Button.drawButtons(buttons, batch);
-        for (int node : graph.getNeighbors(graph.convertTupleToId(players.get(turn).getGridPosition()))) {
+        
+        // choose which player to draw a guide for.
+        for (int node : graph.getNeighbors(graph.convertTupleToId(currentPlayer.getGridPosition()))) {
         	Square square = squares.get(node);
         	square.setAlpha(0.7f);
         	square.draw(batch);
@@ -154,13 +196,13 @@ public class GameBoard implements Scene {
         if (hoveredSquare != null && hoveredWall == null) 	hoveredSquare.draw(batch);
         if (hoveredWall != null) 	hoveredWall.draw(batch);
         for (Sprite wall : placedWalls) wall.draw(batch);
-        players.get(true).draw(batch);
-        players.get(false).draw(batch);
+        playerOne.draw(batch);
+        playerTwo.draw(batch);
         fontOne.draw(batch, 
-        		String.format("%02d", players.get(true).getRemainingWalls()),
+        		String.format("%02d", playerOne.getRemainingWalls()),
         		215f, Constant.SCREEN_SIZE - 30f);
         fontTwo.draw(batch, 
-        		String.format("%02d", players.get(false).getRemainingWalls()),
+        		String.format("%02d", playerTwo.getRemainingWalls()),
         		Constant.SCREEN_SIZE - 240f, Constant.SCREEN_SIZE - 30f);
         batch.end();
     }
@@ -186,6 +228,10 @@ public class GameBoard implements Scene {
     private void setupGameBoard() {
         graph = new Graph(9,9);
         graphUpdater = new GraphUpdater(graph);
+        currentPlayer = playerOne;
+        if (this.gameMode == State.GAME_1P) {
+        	playerTwo.setGraph(graph);
+        }
         
         Texture squareTexture 	= FileManager.getTexture("hover.png");
         Texture wallTexture   	= FileManager.getTexture("wall.png");
@@ -193,17 +239,20 @@ public class GameBoard implements Scene {
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 int id = graph.convertTupleToId(new Position(i, j));
+                // create invisible layer of squares, that will become visible when the player hovers over them.
                 squares.put(id, new Square( squareTexture, i, j,
                         Constant.GRID_OFFSET_X + i*Constant.SQUARE_SIZE + 9,
                         Constant.GRID_OFFSET_Y + j*Constant.SQUARE_SIZE + 8
                 ));
                 if (i > 0) {
+                	// create invisible layer of vertical walls.
 	                walls.put(id + " v", new Wall(wallTexture, i, j, 
 	            		Constant.GRID_OFFSET_X + i*Constant.SQUARE_SIZE + 1,
 	            		Constant.GRID_OFFSET_Y + j*Constant.SQUARE_SIZE + 8, 'v'
 	        		));
                 }
                 if(j < 8) {
+                	// create invisible layer of horizontal walls.
                 	Wall wall = new Wall(wallTexture, i, j, 
 	                		Constant.GRID_OFFSET_X + i*Constant.SQUARE_SIZE + 1 + Constant.SQUARE_SIZE / 2, 
 	                		Constant.GRID_OFFSET_Y + j*Constant.SQUARE_SIZE + 8 + Constant.SQUARE_SIZE / 2, 'h');
@@ -226,11 +275,15 @@ public class GameBoard implements Scene {
     	wallToPlace = null;
         Square hovered = null;
         for (Square s : squares.values()) {
-            if (s.getBoundingRectangle().contains(mousePosition) &&
-                    !s.getGridPosition().equals(players.get(false).getGridPosition()) &&
-                    !s.getGridPosition().equals(players.get(true).getGridPosition()) &&
+            if (s.getBoundingRectangle().contains(mousePosition) && // mouse is over this square.
+            		
+            		// make sure that the hovered square is not either player's current position.
+                    !s.getGridPosition().equals( playerTwo.getGridPosition() ) &&
+                    !s.getGridPosition().equals( playerOne.getGridPosition() ) && 
+                    
+                    // make sure that the player can move to this position.
                     graph.neighborExists(
-                		graph.convertTupleToId( players.get(turn).getGridPosition() ), 
+                		graph.convertTupleToId( currentPlayer.getGridPosition() ), 
                 		graph.convertTupleToId( s.getGridPosition() )
             		)) {
                 s.setAlpha(0.7f);
@@ -253,7 +306,7 @@ public class GameBoard implements Scene {
      * @return the wall that is being hovered, or null.
      */
     public Wall wallHover(Map<String, Wall> walls, Vector2 mousePosition) {
-    	if (players.get(turn).getRemainingWalls() == 0) return null;
+    	if (currentPlayer.getRemainingWalls() == 0) return null;
     	Wall hovered = null;
     	for (Wall w : walls.values()) {
 	    	if (w.getBoundingRectangle().contains(mousePosition)) {
@@ -279,7 +332,7 @@ public class GameBoard implements Scene {
      * the wall will be placed so that it stays in bounds.
      */
     public boolean placeNewWall() {
-    	if (players.get(turn).getRemainingWalls() == 0) {return false;}
+    	if (currentPlayer.getRemainingWalls() == 0) {return false;}
     	Sprite newWall;
     	if (turn) newWall = new Sprite(playerOneWall);
     	else newWall = new Sprite(playerTwoWall);
@@ -307,8 +360,16 @@ public class GameBoard implements Scene {
     	
     	placedWalls.add(newWall); // place visual wall
     	graphUpdater.placeWall(wallToPlace); 
-    	players.get(turn).decrementWalls();
+    	currentPlayer.decrementWalls();
     	return true;
+    }
+    
+    /**
+     * Changes the current player, and toggles the turn boolean.
+     */
+    private void changeTurn() {
+    	turn = !turn;
+    	currentPlayer = (turn) ? playerOne : playerTwo;
     }
     
     /**

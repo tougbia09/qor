@@ -12,7 +12,6 @@ import com.bangma.qor.math.WallVector;
  */
 public class GraphUpdater {
 	private Graph 	graph;
-	private int 	width;
 	private List<WallVector> walls;
 	
 	/**
@@ -21,7 +20,6 @@ public class GraphUpdater {
 	 */
 	public GraphUpdater(Graph graph) {
 		this.graph = graph;
-		width = graph.getWidth();
 		walls = new ArrayList<>();
 	}
 	
