@@ -7,6 +7,8 @@ import com.bangma.qor.config.Constant;
 import com.bangma.qor.objects.Button;
 import com.bangma.qor.objects.Scene;
 import com.bangma.qor.utility.FileManager;
+import com.bangma.qor.utility.StateManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +47,7 @@ public class MainMenu implements Scene {
 
     public void update(Vector2 mousePosition) {
         Button.buttonClick(buttons, mousePosition);
+        StateManager.resetGameState();
     }
 
     public void draw() {

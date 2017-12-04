@@ -10,6 +10,7 @@ import com.bangma.qor.config.Constant;
 import com.bangma.qor.objects.Button;
 import com.bangma.qor.objects.Scene;
 import com.bangma.qor.utility.FileManager;
+import com.bangma.qor.utility.StateManager;
 import com.bangma.qor.utility.StateManager.State;
 
 public class WinScreen implements Scene {

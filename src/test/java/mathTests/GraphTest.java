@@ -4,6 +4,7 @@ import java.util.*;
 import org.junit.*;
 import com.bangma.qor.math.Graph;
 import com.bangma.qor.math.Position;
+import com.bangma.qor.testable.GraphUpdater;
 
 import static org.junit.Assert.*;
 
@@ -140,8 +141,8 @@ public class GraphTest {
      * Test that weights are assigned to the graph properly
      */
 	@Test public void testWeightAssignment() {
-	    g.addConnection(0, 1, 10);
-	    assertSame(g.getWeight(0, 1), 10);
+	    g.addConnection(0, 1);
+	    assertSame(1, g.getWeight(0, 1));
     }
 	
 	/**
@@ -237,10 +238,10 @@ public class GraphTest {
     @Test public void testDijkstrasWithSimpleGraph() {
         Graph graph = new Graph(2,2);
 
-        graph.addConnection(0, 1, 1);
-        graph.addConnection(1, 3, 1);
-        graph.addConnection(0, 2, 1);
-        graph.addConnection(2, 3, 1);
+        graph.addConnection(0, 1);
+        graph.addConnection(1, 3);
+        graph.addConnection(0, 2);
+        graph.addConnection(2, 3);
 
         assertSame("Node 0", graph.getNeighbors(0).size(), 2);
         assertSame("Node 1", graph.getNeighbors(1).size(), 2);
@@ -304,5 +305,8 @@ public class GraphTest {
     	g.getNeighbors(0);
     	assertFalse(g.neighborExists(0, -1));
     	assertFalse(g.neighborExists(0, 4));
+    }
+    @Test public void testGraphHashIsNotOrdered() {
+    	assertTrue(Graph.graphHash(1, 2).equals(Graph.graphHash(2, 1))); 
     }
 }

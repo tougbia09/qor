@@ -21,7 +21,6 @@ public class StateManager {
         MODE_SELECT,        // choose one player or two player mode
         KILL_GAME           // flag the main loop to kill the application
     }
-
     private static Scene currentScene;
     private static EnumMap<State, Scene> scenes;
 
@@ -56,5 +55,9 @@ public class StateManager {
         for (Scene scene : scenes.values()) {
             scene.dispose();
         }
+    }
+    public static void resetGameState() {
+    	scenes.put(State.GAME_1P, new GameBoard(State.GAME_1P));
+    	scenes.put(State.GAME_2P, new GameBoard(State.GAME_2P));
     }
 }

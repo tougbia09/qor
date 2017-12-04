@@ -9,7 +9,7 @@ import java.util.*;
  * high.
  */
 public class Graph {
-    private static final int INF = Integer.MAX_VALUE;
+    public static final int INF = Integer.MAX_VALUE;
     private static final int NULL = -1;
 
     private final int width;
@@ -74,20 +74,21 @@ public class Graph {
      */
     public int getWeight(int nodeOne, int nodeTwo) {
         if (this.neighborExists(nodeOne, nodeTwo)) {
-        	return 1;
+        	Integer setWeight = allWeights.get(graphHash(nodeOne, nodeTwo));
+        	return (setWeight == null) ? 1 : setWeight;
         }
         return INF;
     }
-
+    
     /**
      * Set the weight between two nodes.
      * @param nodeOne source node
      * @param nodeTwo destination node
      * @param weight weight to assign
      */
-    public void addConnection(int nodeOne, int nodeTwo, int weight) {
+    public void addConnection(int nodeOne, int nodeTwo) {
         this.addNeighbor(nodeOne, nodeTwo);
-        this.allWeights.put(graphHash(nodeOne, nodeTwo), weight);
+        this.allWeights.put(graphHash(nodeOne, nodeTwo), 1);
     }
     /**
      * This method defaults to a basid grid pattern (like a chess board)
@@ -118,6 +119,10 @@ public class Graph {
             this.allNeighbors.put(node, neighbors);
             return neighbors;
         }
+    }
+    
+    public void setNeighbors(int node, Set<Integer> neighbors) {
+    	this.allNeighbors.put(node, neighbors);
     }
     
     /**
@@ -157,7 +162,7 @@ public class Graph {
      * @param n2 node two
      * @return a string hash in the format "n1,n2".
      */
-    private static String graphHash(int n1, int n2) {
+    public static String graphHash(int n1, int n2) {
     	if (n1 > n2) return n1 + "," + n2;
     	else return n2 + "," + n1;
     }
@@ -208,9 +213,6 @@ public class Graph {
         while(prev[u] != NULL) {
         	if (path.size() > Math.pow(this.width, 2)) {
         		System.out.println("cannot find a path...");
-        		for (int i : path) {
-        			System.out.print(i + " ");
-        		}
         		break;
         	}
             path.push(u);
@@ -264,7 +266,7 @@ public class Graph {
 
         this.allNeighbors.put(nodeOne, nodeOneNeighbors);
         this.allNeighbors.put(nodeTwo, nodeTwoNeighbors);
-
+        this.allWeights.put(graphHash(nodeOne, nodeTwo), 1);
     }
 
     public int              getWidth()      { return width; }

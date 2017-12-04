@@ -8,7 +8,7 @@ import com.bangma.qor.math.Position;
 public class Player extends Sprite {
     private Position gridPosition;
     private int walls;
-
+    
     public Player(Texture t, int x, int y) {
         super(t);
         walls = 10;
@@ -22,7 +22,7 @@ public class Player extends Sprite {
     }
 
     public Position getGridPosition() {
-        return gridPosition;
+        return this.gridPosition;
     }
     private void setPixelPosition(Position gridPosition) {
         this.setX((float) Constant.GRID_OFFSET_X + (gridPosition.x * Constant.SQUARE_SIZE + 9));

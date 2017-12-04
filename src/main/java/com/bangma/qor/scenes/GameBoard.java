@@ -18,10 +18,9 @@ import com.bangma.qor.objects.RobotPlayer;
 import com.bangma.qor.objects.Scene;
 import com.bangma.qor.objects.Square;
 import com.bangma.qor.objects.Wall;
+import com.bangma.qor.testable.GraphUpdater;
 import com.bangma.qor.utility.FileManager;
 import com.bangma.qor.utility.StateManager;
-
-import testable.GraphUpdater;
 
 import java.awt.Desktop;
 import java.net.URI;
@@ -72,8 +71,10 @@ public class GameBoard implements Scene {
         fontTwo			= new BitmapFont();
         this.gameMode 	= gameMode;
         hoveredSquare 	= null;
+        graph 			= new Graph(9,9);
+        graphUpdater 	= new GraphUpdater(graph);
         
-        fontOne.getData().setScale(8f, 8f); // there has to be a better way :(
+        fontOne.getData().setScale(8f, 8f); // TODO: there has to be a better way :(
         fontTwo.getData().setScale(8f, 8f);
         
         buttons.add(new Button(
@@ -95,8 +96,9 @@ public class GameBoard implements Scene {
         playerTwoWall = FileManager.getTexture("placed wall player two.png");
         
         playerOne = new Player(FileManager.getTexture("playerOne.png"), 4, 0);
-        playerTwo = new RobotPlayer(FileManager.getTexture("playerTwo.png"), 4, 8, playerOne);
+        playerTwo = new RobotPlayer(FileManager.getTexture("playerTwo.png"), 4, 8);
         wallToPlace = null;
+        
         setupGameBoard();
     }
     
@@ -104,7 +106,9 @@ public class GameBoard implements Scene {
     	// confirm that the mouse has been clicked over a square that isnt either players position.
         if (turn && Gdx.input.justTouched()) {
         	if (hoveredSquare != null) {
+//        		graphUpdater.makeAvailable(playerOne.getGridPosition());
         		playerOne.move(hoveredSquare.getGridPosition());
+//        		graphUpdater.makeUnavailable(playerOne.getGridPosition());
         		charMoved = true;
         	}
             if (hoveredWall != null) {
@@ -226,8 +230,6 @@ public class GameBoard implements Scene {
      * the single-width wall placeholders.
      */
     private void setupGameBoard() {
-        graph = new Graph(9,9);
-        graphUpdater = new GraphUpdater(graph);
         currentPlayer = playerOne;
         if (this.gameMode == State.GAME_1P) {
         	playerTwo.setGraph(graph);
