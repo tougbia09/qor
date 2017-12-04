@@ -258,14 +258,14 @@ public class GraphTest {
     }
     @Test public void testFindPathWithNineByNineGraph() {
     	Graph graph = new Graph(9,9);
-    	assertTrue(graph.neighborExists(0, 1));
-    	assertTrue(graph.neighborExists(1, 2));
-    	assertTrue(graph.neighborExists(2, 3));
-    	assertTrue(graph.neighborExists(3, 4));
-    	assertTrue(graph.neighborExists(4, 5));
-    	assertTrue(graph.neighborExists(5, 6));
-    	assertTrue(graph.neighborExists(6, 7));
-    	assertTrue(graph.neighborExists(7, 8));
+    	assertTrue(graph.getNeighbors(0).contains(1));
+    	assertTrue(graph.getNeighbors(1).contains(2));
+    	assertTrue(graph.getNeighbors(2).contains(3));
+    	assertTrue(graph.getNeighbors(3).contains(4));
+    	assertTrue(graph.getNeighbors(4).contains(5));
+    	assertTrue(graph.getNeighbors(5).contains(6));
+    	assertTrue(graph.getNeighbors(6).contains(7));
+    	assertTrue(graph.getNeighbors(7).contains(8));
     	assertTrue(graph.findPath(0, 8).size() < 10);
     }
     @Test public void testIdConversionToTupleZero() {
@@ -298,13 +298,13 @@ public class GraphTest {
     
     @Test public void testNeighborExistsReturnsTrueForExistingConnections() {
     	g.getNeighbors(0);
-    	assertTrue(g.neighborExists(0, 1));
+    	assertTrue(g.getNeighbors(0).contains(1));
     }
     
     @Test public void testNeighborExistsReturnsFalseForNonExistantConnections() {
     	g.getNeighbors(0);
-    	assertFalse(g.neighborExists(0, -1));
-    	assertFalse(g.neighborExists(0, 4));
+    	assertFalse(g.getNeighbors(0).contains(-1));
+    	assertFalse(g.getNeighbors(0).contains(4));
     }
     @Test public void testGraphHashIsNotOrdered() {
     	assertTrue(Graph.graphHash(1, 2).equals(Graph.graphHash(2, 1))); 

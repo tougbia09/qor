@@ -106,9 +106,7 @@ public class GameBoard implements Scene {
     	// confirm that the mouse has been clicked over a square that isnt either players position.
         if (turn && Gdx.input.justTouched()) {
         	if (hoveredSquare != null) {
-//        		graphUpdater.makeAvailable(playerOne.getGridPosition());
         		playerOne.move(hoveredSquare.getGridPosition());
-//        		graphUpdater.makeUnavailable(playerOne.getGridPosition());
         		charMoved = true;
         	}
             if (hoveredWall != null) {
@@ -119,8 +117,9 @@ public class GameBoard implements Scene {
             }
         }
         if (!turn) {
-        	playerTwo.update();
-        	playerTwo.makeOwnMove();
+        	graph.hideNode(graph.convertTupleToId(playerOne.getGridPosition()));
+        	playerTwo.makeOwnMove(graph);
+        	graph.showNode(graph.convertTupleToId(playerOne.getGridPosition()));
         	changeTurn();
         }
     }
@@ -231,9 +230,6 @@ public class GameBoard implements Scene {
      */
     private void setupGameBoard() {
         currentPlayer = playerOne;
-        if (this.gameMode == State.GAME_1P) {
-        	playerTwo.setGraph(graph);
-        }
         
         Texture squareTexture 	= FileManager.getTexture("hover.png");
         Texture wallTexture   	= FileManager.getTexture("wall.png");
@@ -284,10 +280,11 @@ public class GameBoard implements Scene {
                     !s.getGridPosition().equals( playerOne.getGridPosition() ) && 
                     
                     // make sure that the player can move to this position.
-                    graph.neighborExists(
-                		graph.convertTupleToId( currentPlayer.getGridPosition() ), 
-                		graph.convertTupleToId( s.getGridPosition() )
-            		)) {
+                	graph.getNeighbors(
+                		graph.convertTupleToId(currentPlayer.getGridPosition())
+            		).contains(
+        				graph.convertTupleToId(s.getGridPosition())
+    				)) {
                 s.setAlpha(0.7f);
                 hovered = s;
                 break;

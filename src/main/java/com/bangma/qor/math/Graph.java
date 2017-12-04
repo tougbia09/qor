@@ -1,6 +1,9 @@
 package com.bangma.qor.math;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import com.bangma.qor.utility.DebugPrint;
 
 /**
  * This is the abstract class to represent the graphs used in
@@ -19,8 +22,9 @@ public class Graph {
     private int[] prev;
 
     private Set<Integer> allNodes;
-    private Map<String, Integer> allWeights;
     private Map<Integer, Set<Integer>> allNeighbors;
+    
+    private int hiddenNode = -1;
     
     /**
      * @param width width in nodes of the graph.
@@ -33,16 +37,16 @@ public class Graph {
         this.allNodes   = new HashSet<>();
         this.dist       = new int[this.width * this.height];
         this.prev       = new int[this.width * this.height];
-
+        
+        this.allNeighbors = new HashMap<>();
+        
         // assign the node ids
         for (int i = 0, l = this.width * this.height; i < l; i++) {
             this.allNodes.add(i);
+            generateNeighbors(i);
         }
-
-        this.allNeighbors   = new HashMap<>();
-        this.allWeights     = new HashMap<>();
     }
-
+    
     /**
      * Convert an (x,y) coordinates pair to a location on the graph.
      * @param tuple an (x,y) pair
@@ -73,9 +77,11 @@ public class Graph {
      * @return the weight between the nodes, or INF
      */
     public int getWeight(int nodeOne, int nodeTwo) {
-        if (this.neighborExists(nodeOne, nodeTwo)) {
-        	Integer setWeight = allWeights.get(graphHash(nodeOne, nodeTwo));
-        	return (setWeight == null) ? 1 : setWeight;
+    	if (nodeOne == this.hiddenNode && nodeTwo == this.hiddenNode) {
+    		return INF;
+    	}
+    	if (getNeighbors(nodeOne).contains(nodeTwo) || getNeighbors(nodeOne).contains(nodeOne)) {
+        	return 1;
         }
         return INF;
     }
@@ -88,7 +94,6 @@ public class Graph {
      */
     public void addConnection(int nodeOne, int nodeTwo) {
         this.addNeighbor(nodeOne, nodeTwo);
-        this.allWeights.put(graphHash(nodeOne, nodeTwo), 1);
     }
     /**
      * This method defaults to a basid grid pattern (like a chess board)
@@ -100,25 +105,31 @@ public class Graph {
      * @return a list of existing neighbors ( or generated neighbors )
      */
     public Set<Integer> getNeighbors(int node) {
-        if (this.allNeighbors.containsKey(node)) {
-            return this.allNeighbors.get(node);
-        } else {
-            Set<Integer> neighbors = new HashSet<>();
+    	if (node == this.hiddenNode) { return new HashSet<>(); }
+    	if (this.allNeighbors.get(node).contains(this.hiddenNode)) {
+    		HashSet<Integer> alteredNeighbors = new HashSet<>(this.allNeighbors.get(node));
+    		alteredNeighbors.remove(this.hiddenNode);
+    		return alteredNeighbors;
+    	}
+        return this.allNeighbors.get(node);
+    }
+    
+    /**
+     * Generate the neighbors for a graph.
+     * @param node
+     */
+    public void generateNeighbors(int node) {
+    	Set<Integer> neighbors = new HashSet<>();
+        // node above
+        if (node > this.width - 1) neighbors.add(node - this.width);
+        // node below
+        if (node < this.width * (this.height - 1)) neighbors.add(node + this.width);
+        // node right
+        if (node % this.width != this.width - 1) neighbors.add(node + 1);
+        // node left
+        if (node % this.width != 0) neighbors.add(node - 1);
 
-            // invalid node
-            if (node > this.width * this.height - 1 || node < 0) return neighbors;
-            // node above
-            if (node > this.width - 1) neighbors.add(node - this.width);
-            // node below
-            if (node < this.width * (this.height - 1)) neighbors.add(node + this.width);
-            // node right
-            if (node % this.width != this.width - 1) neighbors.add(node + 1);
-            // node left
-            if (node % this.width != 0) neighbors.add(node - 1);
-
-            this.allNeighbors.put(node, neighbors);
-            return neighbors;
-        }
+        this.allNeighbors.put(node, neighbors);
     }
     
     public void setNeighbors(int node, Set<Integer> neighbors) {
@@ -132,10 +143,10 @@ public class Graph {
      * @param nodeB node to check
      * @return true if a connection exists, false otherwise
      */
-    public boolean neighborExists(int nodeA, int nodeB) {
-    	if (this.allNeighbors.get(nodeA) == null) getNeighbors(nodeA);
-    	return this.allNeighbors.get(nodeA).contains(nodeB);
-    }
+//    public boolean neighborExists(int nodeA, int nodeB) {
+//    	if (this.allNeighbors.get(nodeA) == null) getNeighbors(nodeA);
+//    	return this.allNeighbors.get(nodeA).contains(nodeB);
+//    }
     
     /**
      * disconnect two nodes if they are neighbors. This will remove
@@ -266,9 +277,14 @@ public class Graph {
 
         this.allNeighbors.put(nodeOne, nodeOneNeighbors);
         this.allNeighbors.put(nodeTwo, nodeTwoNeighbors);
-        this.allWeights.put(graphHash(nodeOne, nodeTwo), 1);
     }
-
+    
+    public void hideNode(int node) { 
+    	this.hiddenNode = node; 
+	}
+    public void showNode(int node) { 
+    	this.hiddenNode = -1; 
+	}
     public int              getWidth()      { return width; }
     public int              getHEIGHT()     { return height; }
     public Set<Integer>     getAllNodes()   { return allNodes; }

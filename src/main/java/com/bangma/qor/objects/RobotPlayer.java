@@ -6,6 +6,7 @@ import java.util.List;
 import com.badlogic.gdx.graphics.Texture;
 import com.bangma.qor.math.Graph;
 import com.bangma.qor.math.Position;
+import com.bangma.qor.utility.DebugPrint;
 
 /**
  * The pathfinding bot is saved here, it extends a regular player for ease of use.
@@ -32,17 +33,15 @@ public class RobotPlayer extends Player {
 		Position pos = new Position(x, y);
         move(pos);
 	}
-	
 	/**
-	 * Run all of the necessary functions to update where the bot needs to go, and what it needs to do.
+	 * this function moves the bot to its next calculated position.
 	 */
-	public void update() {
-		/* TODO currently the bot aims for one square, 
-		 * make modifications so that it aims for any in the corresponding row. */
+	public void makeOwnMove(Graph graph) {
 		int shortestDist = Graph.INF;
 		this.bestPath = null;
+		
+		// calculate movements.
 		for (int node : winNodes) {
-			System.out.println("Checking: " + graph.convertTupleToId(this.getGridPosition()) + " " + node);
 			try {
 				Deque<Integer> newPath = graph.findPath(graph.convertTupleToId(this.getGridPosition()), node);
 				if (newPath != null && !newPath.isEmpty() && newPath.size() < shortestDist) {
@@ -51,24 +50,13 @@ public class RobotPlayer extends Player {
 				}
 			} catch (Exception e) { /* node is not accessible */ }
 		}
-	}
-	
-	/**
-	 * this function moves the bot to its next calculated position.
-	 */
-	public void makeOwnMove() {
+		
+		// execute movements.
 		if (this.bestPath != null) {
-			for (Object node : this.bestPath.toArray()) {
-				System.out.println(node);
-			}
 			this.bestPath.pop(); // don't move to the current node. (find path returns the whole path (w start and end))
 			this.move(graph.convertIdToTuple(this.bestPath.pop()));
 		} else {
 			System.out.println("Something went wrong.");
 		}
-	}
-	
-	public void setGraph(Graph graph) {
-		this.graph = graph;
 	}
 }
